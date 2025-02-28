@@ -1,40 +1,67 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
 {
     [Header("Attributes")]
-    [SerializeField] private float hitPoints = 4f; 
-    private float maxHitPoints;                   
-    private bool isDestroyed = false;
-    public HealthBar healthBar;
+    [SerializeField] private int maxHealth = 10;
+    [SerializeField] private int goldValue = 10; // Số vàng nhận được khi tiêu diệt quái
 
-    void Start()
+    [Header("References")]
+    [SerializeField] private HealthBar healthBar; // Tham chiếu đến HealthBar của quái
+
+    private int currentHealth;
+
+    private void Start()
     {
-        maxHitPoints = hitPoints;
-        healthBar.SetHealth(hitPoints, maxHitPoints);
-    }
-
-    public void TakeDamage(int dmg)
-    {
-        hitPoints -= dmg;
-        healthBar.SetHealth(hitPoints, maxHitPoints);
-
-        if (hitPoints <= 0 && !isDestroyed)
+        currentHealth = maxHealth;
+        if (healthBar != null)
         {
-            EnemySpawner.onEnemyDestroy.Invoke();
-            isDestroyed = true;
-            Destroy(gameObject);
+            healthBar.SetHealth(currentHealth, maxHealth); // Khởi tạo thanh máu
+        }
+        else
+        {
+            Debug.LogWarning("HealthBar not assigned in " + gameObject.name + "!");
         }
     }
 
-   
-    public float GetCurrentHealth()
+    public void TakeDamage(int damage)
     {
-        return hitPoints;
+        currentHealth -= damage;
+
+        if (healthBar != null)
+        {
+            healthBar.SetHealth(currentHealth, maxHealth); // Cập nhật thanh máu
+        }
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
     }
 
-    public float GetMaxHealth()
+    private void Die()
     {
-        return maxHitPoints;
+        // Cộng vàng vào GoldManager
+        GoldManager goldManager = GoldManager.Instance;
+        if (goldManager != null)
+        {
+            goldManager.AddGold(goldValue);
+        }
+        else
+        {
+            Debug.LogError("GoldManager instance is missing!");
+        }
+
+        // Gọi sự kiện để giảm enemiesAlive trong EnemySpawner
+        EnemySpawner.onEnemyDestroy.Invoke();
+
+        // Hủy quái
+        Destroy(gameObject);
+    }
+
+    // Getter để lấy giá trị vàng của quái
+    public int GetGoldValue()
+    {
+        return goldValue;
     }
 }

@@ -9,7 +9,7 @@ public class Plot : MonoBehaviour
     private GameObject tower;
     private Color startColor;
 
-     private void Start()
+    private void Start()
     {
         startColor = sr.color;
     }
@@ -28,7 +28,7 @@ public class Plot : MonoBehaviour
         if (tower != null) return;
 
         GameObject towerToBuild = BuildManager.main.GetSelectedTower();
-        
+
         tower = Instantiate(towerToBuild, transform.position, Quaternion.identity);
     }
 }

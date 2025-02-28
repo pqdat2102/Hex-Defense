@@ -20,7 +20,7 @@ public class Turret : MonoBehaviour
 
     private void Update()
     {
-        if(target == null)
+        if (target == null)
         {
             FindTarget();
             return;
@@ -31,23 +31,25 @@ public class Turret : MonoBehaviour
         if (!CheckTargetIsInRange())
         {
             target = null;
-        } else {
+        }
+        else
+        {
             timeUntilFire += Time.deltaTime;
 
-            if(timeUntilFire >= 1f / bps)
+            if (timeUntilFire >= 1f / bps)
             {
                 Shoot();
                 timeUntilFire = 0f;
             }
         }
-       
+
     }
 
     private void FindTarget()
     {
         RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position, targetingRange, (Vector2)transform.position, 0f, enemyMask);
 
-        if(hits.Length > 0)
+        if (hits.Length > 0)
         {
             target = hits[0].transform;
         }
@@ -77,8 +79,20 @@ public class Turret : MonoBehaviour
         GameObject bulletObj = Instantiate(bulletPrefab, firingPoint.position, Quaternion.identity);
         Bullet bulletScript = bulletObj.GetComponent<Bullet>();
 
-        // Tính hướng từ firingPoint đến target tại thời điểm bắn
-        Vector2 direction = (target.position - firingPoint.position).normalized;
+        // Lấy vận tốc từ EnemyMovement
+        EnemyMovement enemyMovement = target.GetComponent<EnemyMovement>();
+        Vector2 targetVelocity = enemyMovement ? enemyMovement.GetVelocity() : Vector2.zero;
+
+        // Tính khoảng cách và thời gian đạn bay tới
+        Vector2 currentTargetPos = target.position;
+        float distance = Vector2.Distance(firingPoint.position, currentTargetPos);
+        float bulletSpeed = bulletScript.GetBulletSpeed();
+        float timeToHit = distance / bulletSpeed;
+
+        // Dự đoán vị trí tương lai
+        Vector2 predictedPos = currentTargetPos + targetVelocity * timeToHit;
+        Vector2 direction = (predictedPos - (Vector2)firingPoint.position).normalized;
+
         bulletScript.SetDirection(direction);
     }
 }

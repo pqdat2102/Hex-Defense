@@ -1,13 +1,12 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-
+using TMPro; // Nếu dùng TextMeshPro, nếu dùng Text thì thay bằng UnityEngine.UI.Text
 
 public class EnemySpawner : MonoBehaviour
 {
-    [Header("Refences")]
+    [Header("References")]
     [SerializeField] private GameObject[] enemyPrefabs;
-
 
     [Header("Attributes")]
     [SerializeField] private int baseEnemies = 8;
@@ -15,24 +14,27 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float timeBetweenWaves = 5f;
     [SerializeField] private float difficultyScalingFactor = 0.75f;
 
+    [Header("UI References")]
+    [SerializeField] private TextMeshProUGUI waveText; // Hoặc Text nếu dùng Text cũ
+
     [Header("Events")]
     public static UnityEvent onEnemyDestroy = new UnityEvent();
-
 
     private int currentWave = 1;
     private float timeSinceLastSpawn;
     private int enemiesAlive;
-    private int enemiesLeftToSpawm;
+    private int enemiesLeftToSpawn;
     private bool isSpawning = false;
-
 
     private void Awake()
     {
         onEnemyDestroy.AddListener(EnemyDestroyed);
     }
+
     private void Start()
     {
         StartCoroutine(StartWave());
+        UpdateWaveText(); // Hiển thị wave ban đầu
     }
 
     private void Update()
@@ -41,14 +43,15 @@ public class EnemySpawner : MonoBehaviour
 
         timeSinceLastSpawn += Time.deltaTime;
 
-        if (timeSinceLastSpawn >= (1f / enemyPerSecond) && enemiesLeftToSpawm > 0){
+        if (timeSinceLastSpawn >= (1f / enemyPerSecond) && enemiesLeftToSpawn > 0)
+        {
             SpawnEnemy();
-            enemiesLeftToSpawm--;
+            enemiesLeftToSpawn--;
             enemiesAlive++;
             timeSinceLastSpawn = 0f;
         }
 
-        if(enemiesAlive == 0 && enemiesLeftToSpawm == 0)
+        if (enemiesAlive == 0 && enemiesLeftToSpawn == 0)
         {
             EndWave();
         }
@@ -64,14 +67,15 @@ public class EnemySpawner : MonoBehaviour
         isSpawning = false;
         currentWave++;
         timeSinceLastSpawn = 0f;
+        UpdateWaveText(); // Cập nhật wave sau khi kết thúc wave
         StartCoroutine(StartWave());
-
     }
+
     private IEnumerator StartWave()
     {
         yield return new WaitForSeconds(timeBetweenWaves);
         isSpawning = true;
-        enemiesLeftToSpawm = EnemyPerWaves();
+        enemiesLeftToSpawn = EnemyPerWaves();
     }
 
     private void SpawnEnemy()
@@ -82,11 +86,15 @@ public class EnemySpawner : MonoBehaviour
 
     private int EnemyPerWaves()
     {
-        return Mathf.RoundToInt (baseEnemies * Mathf.Pow(currentWave, difficultyScalingFactor));
+        return Mathf.RoundToInt(baseEnemies * Mathf.Pow(currentWave, difficultyScalingFactor));
     }
 
-   
-
-
-
+    // Hàm cập nhật text hiển thị wave
+    private void UpdateWaveText()
+    {
+        if (waveText != null)
+        {
+            waveText.text = "Wave: " + currentWave;
+        }
+    }
 }

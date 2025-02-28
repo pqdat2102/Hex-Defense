@@ -1,10 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyMovement : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Rigidbody2D rb;
-
 
     [Header("Attributes")]
     [SerializeField] private float moveSpeed = 2f;
@@ -16,9 +15,10 @@ public class EnemyMovement : MonoBehaviour
     {
         target = LevelManager.main.path[pathIndex];
     }
+
     private void Update()
     {
-        if(Vector2.Distance(target.position, transform.position) <= 0.1f)
+        if (Vector2.Distance(target.position, transform.position) <= 0.1f)
         {
             pathIndex++;
 
@@ -27,7 +27,8 @@ public class EnemyMovement : MonoBehaviour
                 EnemySpawner.onEnemyDestroy.Invoke();
                 Destroy(gameObject);
                 return;
-            } else
+            }
+            else
             {
                 target = LevelManager.main.path[pathIndex];
             }
@@ -37,7 +38,12 @@ public class EnemyMovement : MonoBehaviour
     private void FixedUpdate()
     {
         Vector2 direction = (target.position - transform.position).normalized;
-
         rb.linearVelocity = direction * moveSpeed;
+    }
+
+    // Thêm getter để lấy vận tốc hiện tại
+    public Vector2 GetVelocity()
+    {
+        return rb.linearVelocity;
     }
 }

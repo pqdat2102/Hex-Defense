@@ -20,15 +20,12 @@ public class Bullet : MonoBehaviour
 
     private void Update()
     {
-        // Kiểm tra nếu đạn ra khỏi màn hình
         Vector3 screenPos = Camera.main.WorldToViewportPoint(transform.position);
         if (screenPos.x < 0 || screenPos.x > 1 || screenPos.y < 0 || screenPos.y > 1)
         {
             Destroy(gameObject);
         }
     }
-
-
 
     private void OnCollisionEnter2D(Collision2D other)
     {
@@ -43,5 +40,11 @@ public class Bullet : MonoBehaviour
     public void SetDirection(Vector2 direction)
     {
         initialDirection = direction.normalized;
+    }
+
+    // Thêm getter để lấy bulletSpeed
+    public float GetBulletSpeed()
+    {
+        return bulletSpeed;
     }
 }
