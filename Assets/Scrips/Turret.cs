@@ -1,6 +1,5 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Turret : MonoBehaviour
 {
@@ -8,17 +7,17 @@ public class Turret : MonoBehaviour
     [SerializeField] private Transform turretRotationPoint;
     [SerializeField] private LayerMask enemyMask;
     [SerializeField] private GameObject bulletPrefab;
-    [SerializeField] private Transform firingPoint; // Vẫn giữ để bắn đạn
-    [SerializeField] private Transform recoilPoint; // Tham chiếu đến Recoil Point (phần thân súng)
+    [SerializeField] private Transform firingPoint;
+    [SerializeField] private Transform recoilPoint;
 
     [Header("Attributes")]
     [SerializeField] public float targetingRange = 5f;
     [SerializeField] private float rotationSpeed = 200f;
     [SerializeField] private float bps = 1f; // Bullets per second
-    [SerializeField] private int cost = 50; // Giá trụ
+    [SerializeField] private int cost = 50;
 
     [Header("Recoil")]
-    [SerializeField] private TurretRecoil recoilScript; // Tham chiếu đến TurretRecoil trên Recoil Point
+    [SerializeField] private TurretRecoil recoilScript;
 
     private Transform target;
     private float timeUntilFire;
@@ -39,10 +38,9 @@ public class Turret : MonoBehaviour
             return;
         }
 
-        // Chỉ quay nếu turret có thể quay
         if (recoilScript != null && !recoilScript.CanRotateAndFire())
         {
-            return; // Không quay nếu đang giật
+            return;
         }
 
         RotateTowardsTarget();
@@ -55,7 +53,6 @@ public class Turret : MonoBehaviour
         {
             timeUntilFire += Time.deltaTime;
 
-            // Chỉ bắn nếu turret có thể quay và bắn
             if (timeUntilFire >= 1f / bps && (recoilScript == null || recoilScript.CanRotateAndFire()))
             {
                 Shoot();
@@ -83,7 +80,6 @@ public class Turret : MonoBehaviour
     private void RotateTowardsTarget()
     {
         float angle = Mathf.Atan2(target.position.y - transform.position.y, target.position.x - transform.position.x) * Mathf.Rad2Deg - 90f;
-
         Quaternion targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
         turretRotationPoint.rotation = Quaternion.RotateTowards(turretRotationPoint.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
@@ -104,19 +100,19 @@ public class Turret : MonoBehaviour
             EnemyMovement enemyMovement = target.GetComponent<EnemyMovement>();
             Vector2 targetVelocity = enemyMovement ? enemyMovement.GetVelocity() : Vector2.zero;
 
-            // Tính khoảng cách và thời gian đạn bay tới
+            // Tính vị trí tương lai chính xác của mục tiêu
             Vector2 currentTargetPos = target.position;
             float distance = Vector2.Distance(firingPoint.position, currentTargetPos);
             float bulletSpeed = bulletScript.GetBulletSpeed();
             float timeToHit = distance / bulletSpeed;
 
-            // Dự đoán vị trí tương lai
             Vector2 predictedPos = currentTargetPos + targetVelocity * timeToHit;
             Vector2 direction = (predictedPos - (Vector2)firingPoint.position).normalized;
 
-            bulletScript.SetDirection(direction);
+            // Truyền hướng và mục tiêu cho đạn
+            bulletScript.SetDirection(direction, target);
 
-            // Áp dụng hiệu ứng giật lên Recoil Point
+            // Áp dụng hiệu ứng giật
             if (recoilScript != null)
             {
                 recoilScript.ApplyRecoil();
@@ -124,7 +120,6 @@ public class Turret : MonoBehaviour
         }
     }
 
-    // Getter để lấy giá trụ
     public int GetCost()
     {
         return cost;

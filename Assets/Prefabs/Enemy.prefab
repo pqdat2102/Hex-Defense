@@ -437,7 +437,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 5897608386232929991}
-  moveSpeed: 2
+  moveSpeed: 1.75
 --- !u!114 &711689421769849679
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -493,8 +493,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfee8abbfeff4c54e915812af3abd90c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 8
-  goldValue: 20
+  maxHealth: 5
+  goldValue: 10
   healthBar: {fileID: 829662048261592481}
 --- !u!1 &6715816242151534454
 GameObject:

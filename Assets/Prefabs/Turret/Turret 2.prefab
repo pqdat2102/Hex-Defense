@@ -57,7 +57,7 @@ MonoBehaviour:
   targetingRange: 2.1
   rotationSpeed: 200
   bps: 2
-  cost: 200
+  cost: 100
   recoilScript: {fileID: 8321848165361534311}
 --- !u!1 &3406644712569687107
 GameObject:

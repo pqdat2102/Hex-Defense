@@ -9,8 +9,10 @@ public class Bullet : MonoBehaviour
     [SerializeField] private float bulletSpeed = 5f;
     [SerializeField] private int bulletDamage = 1;
     [SerializeField] private float maxLifetime = 5f;
+    [SerializeField] private float homingStrength = 2f;
 
     private Vector2 initialDirection;
+    private Transform target;
 
     private void Start()
     {
@@ -20,6 +22,24 @@ public class Bullet : MonoBehaviour
 
     private void Update()
     {
+        // Nếu mục tiêu không còn tồn tại (bị tiêu diệt), hủy đạn ngay lập tức
+        if (target == null || !target.gameObject.activeInHierarchy)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        // Nếu có mục tiêu, điều chỉnh hướng bay
+        if (target != null)
+        {
+            Vector2 directionToTarget = (target.position - transform.position).normalized;
+            Vector2 currentDirection = rb.linearVelocity.normalized;
+
+            Vector2 newDirection = Vector2.Lerp(currentDirection, directionToTarget, homingStrength * Time.deltaTime).normalized;
+            rb.linearVelocity = newDirection * bulletSpeed;
+        }
+
+        // Hủy đạn nếu ra khỏi màn hình
         Vector3 screenPos = Camera.main.WorldToViewportPoint(transform.position);
         if (screenPos.x < 0 || screenPos.x > 1 || screenPos.y < 0 || screenPos.y > 1)
         {
@@ -37,12 +57,12 @@ public class Bullet : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public void SetDirection(Vector2 direction)
+    public void SetDirection(Vector2 direction, Transform targetToTrack)
     {
         initialDirection = direction.normalized;
+        target = targetToTrack;
     }
 
-    // Thêm getter để lấy bulletSpeed
     public float GetBulletSpeed()
     {
         return bulletSpeed;
