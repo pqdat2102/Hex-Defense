@@ -8,6 +8,7 @@ public class BuildManager : MonoBehaviour
     [SerializeField] private GameObject[] towerPrefabs;
 
     private int selectedTower = 0;
+
     private void Awake()
     {
         main = this;
@@ -18,6 +19,8 @@ public class BuildManager : MonoBehaviour
         return towerPrefabs[selectedTower];
     }
 
-
-
+    public GameObject[] GetTowerPrefabs()
+    {
+        return towerPrefabs;
+    }
 }

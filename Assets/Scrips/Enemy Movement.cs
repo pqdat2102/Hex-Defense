@@ -24,8 +24,15 @@ public class EnemyMovement : MonoBehaviour
 
             if (pathIndex >= LevelManager.main.path.Length)
             {
-                EnemySpawner.onEnemyDestroy.Invoke();
-                Destroy(gameObject);
+                // Trừ máu người chơi khi enemy đến điểm cuối
+                PlayerHealth playerHealth = PlayerHealth.Instance;
+                if (playerHealth != null)
+                {
+                    playerHealth.TakeDamage(playerHealth.GetDamagePerEnemy());
+                }
+
+                EnemySpawner.onEnemyDestroy.Invoke(); // Gọi sự kiện để giảm số enemy còn sống
+                Destroy(gameObject); // Hủy enemy
                 return;
             }
             else
@@ -41,7 +48,6 @@ public class EnemyMovement : MonoBehaviour
         rb.linearVelocity = direction * moveSpeed;
     }
 
-    // Thêm getter để lấy vận tốc hiện tại
     public Vector2 GetVelocity()
     {
         return rb.linearVelocity;

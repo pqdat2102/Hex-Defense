@@ -104,6 +104,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 3437500441285254833}
   bulletSpeed: 5
+  bulletDamage: 4
+  maxLifetime: 5
 --- !u!50 &3437500441285254833
 Rigidbody2D:
   serializedVersion: 5

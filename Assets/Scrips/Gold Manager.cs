@@ -20,27 +20,23 @@ public class GoldManager : MonoBehaviour
 
     private void Awake()
     {
-        // Đảm bảo chỉ có một instance của GoldManager
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
         Instance = this;
-
-        DontDestroyOnLoad(gameObject); // Giữ GoldManager qua các scene (nếu cần)
+        currentGold = startingGold;
     }
 
     private void Start()
     {
-        currentGold = startingGold;
+        /*// Xác nhận currentGold trong Start (không cần gán lại)
+        Debug.Log("Gold confirmed in Start: " + currentGold);*/
         UpdateGoldText();
+        GetCurrentGold();
     }
 
     // Cộng vàng (khi tiêu diệt quái)
     public void AddGold(int amount)
     {
-        currentGold += amount;
+        currentGold = Mathf.Max(0, currentGold + amount); // Đảm bảo vàng không âm
+        /*Debug.Log("Gold added. New Gold: " + currentGold);*/
         UpdateGoldText();
         onGoldChanged.Invoke(currentGold); // Gọi sự kiện khi vàng thay đổi
     }
@@ -50,18 +46,19 @@ public class GoldManager : MonoBehaviour
     {
         if (currentGold >= amount)
         {
-            currentGold -= amount;
+            currentGold = Mathf.Max(0, currentGold - amount); // Đảm bảo vàng không âm
             UpdateGoldText();
             onGoldChanged.Invoke(currentGold);
             return true;
         }
-        Debug.Log("Not enough gold!");
+        /*Debug.Log("Not enough gold! Current Gold: " + currentGold + ", Required: " + amount);*/
         return false;
     }
 
     // Lấy số vàng hiện tại
     public int GetCurrentGold()
     {
+        /*Debug.Log("Getting current gold: " + currentGold);*/
         return currentGold;
     }
 
@@ -70,7 +67,12 @@ public class GoldManager : MonoBehaviour
     {
         if (goldText != null)
         {
-            goldText.text = "Gold: " + currentGold;
+            goldText.text = currentGold.ToString();
+            /*Debug.Log("Updated gold text to: Gold: " + currentGold);*/
+        }
+        else
+        {
+           /* Debug.LogWarning("goldText is null in GoldManager!");*/
         }
     }
 }

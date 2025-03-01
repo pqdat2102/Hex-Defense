@@ -8,15 +8,28 @@ public class Turret : MonoBehaviour
     [SerializeField] private Transform turretRotationPoint;
     [SerializeField] private LayerMask enemyMask;
     [SerializeField] private GameObject bulletPrefab;
-    [SerializeField] private Transform firingPoint;
+    [SerializeField] private Transform firingPoint; // Vẫn giữ để bắn đạn
+    [SerializeField] private Transform recoilPoint; // Tham chiếu đến Recoil Point (phần thân súng)
 
-    [Header("Attribute")]
-    [SerializeField] private float targetingRange = 5f;
+    [Header("Attributes")]
+    [SerializeField] public float targetingRange = 5f;
     [SerializeField] private float rotationSpeed = 200f;
-    [SerializeField] private float bps = 1f; // pullets per secound , số lượng đạn trên giây
+    [SerializeField] private float bps = 1f; // Bullets per second
+    [SerializeField] private int cost = 50; // Giá trụ
+
+    [Header("Recoil")]
+    [SerializeField] private TurretRecoil recoilScript; // Tham chiếu đến TurretRecoil trên Recoil Point
 
     private Transform target;
     private float timeUntilFire;
+
+    private void Start()
+    {
+        if (recoilScript == null && recoilPoint != null)
+        {
+            recoilScript = recoilPoint.GetComponent<TurretRecoil>();
+        }
+    }
 
     private void Update()
     {
@@ -24,6 +37,12 @@ public class Turret : MonoBehaviour
         {
             FindTarget();
             return;
+        }
+
+        // Chỉ quay nếu turret có thể quay
+        if (recoilScript != null && !recoilScript.CanRotateAndFire())
+        {
+            return; // Không quay nếu đang giật
         }
 
         RotateTowardsTarget();
@@ -36,13 +55,13 @@ public class Turret : MonoBehaviour
         {
             timeUntilFire += Time.deltaTime;
 
-            if (timeUntilFire >= 1f / bps)
+            // Chỉ bắn nếu turret có thể quay và bắn
+            if (timeUntilFire >= 1f / bps && (recoilScript == null || recoilScript.CanRotateAndFire()))
             {
                 Shoot();
                 timeUntilFire = 0f;
             }
         }
-
     }
 
     private void FindTarget()
@@ -76,23 +95,38 @@ public class Turret : MonoBehaviour
 
     private void Shoot()
     {
-        GameObject bulletObj = Instantiate(bulletPrefab, firingPoint.position, Quaternion.identity);
-        Bullet bulletScript = bulletObj.GetComponent<Bullet>();
+        if (firingPoint != null && bulletPrefab != null && (recoilScript == null || recoilScript.CanRotateAndFire()))
+        {
+            GameObject bulletObj = Instantiate(bulletPrefab, firingPoint.position, Quaternion.identity);
+            Bullet bulletScript = bulletObj.GetComponent<Bullet>();
 
-        // Lấy vận tốc từ EnemyMovement
-        EnemyMovement enemyMovement = target.GetComponent<EnemyMovement>();
-        Vector2 targetVelocity = enemyMovement ? enemyMovement.GetVelocity() : Vector2.zero;
+            // Lấy vận tốc từ EnemyMovement
+            EnemyMovement enemyMovement = target.GetComponent<EnemyMovement>();
+            Vector2 targetVelocity = enemyMovement ? enemyMovement.GetVelocity() : Vector2.zero;
 
-        // Tính khoảng cách và thời gian đạn bay tới
-        Vector2 currentTargetPos = target.position;
-        float distance = Vector2.Distance(firingPoint.position, currentTargetPos);
-        float bulletSpeed = bulletScript.GetBulletSpeed();
-        float timeToHit = distance / bulletSpeed;
+            // Tính khoảng cách và thời gian đạn bay tới
+            Vector2 currentTargetPos = target.position;
+            float distance = Vector2.Distance(firingPoint.position, currentTargetPos);
+            float bulletSpeed = bulletScript.GetBulletSpeed();
+            float timeToHit = distance / bulletSpeed;
 
-        // Dự đoán vị trí tương lai
-        Vector2 predictedPos = currentTargetPos + targetVelocity * timeToHit;
-        Vector2 direction = (predictedPos - (Vector2)firingPoint.position).normalized;
+            // Dự đoán vị trí tương lai
+            Vector2 predictedPos = currentTargetPos + targetVelocity * timeToHit;
+            Vector2 direction = (predictedPos - (Vector2)firingPoint.position).normalized;
 
-        bulletScript.SetDirection(direction);
+            bulletScript.SetDirection(direction);
+
+            // Áp dụng hiệu ứng giật lên Recoil Point
+            if (recoilScript != null)
+            {
+                recoilScript.ApplyRecoil();
+            }
+        }
+    }
+
+    // Getter để lấy giá trụ
+    public int GetCost()
+    {
+        return cost;
     }
 }

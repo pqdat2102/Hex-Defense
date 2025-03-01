@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Plot : MonoBehaviour
 {
@@ -6,29 +6,66 @@ public class Plot : MonoBehaviour
     [SerializeField] private SpriteRenderer sr;
     [SerializeField] private Color hoverColor;
 
-    private GameObject tower;
+    private GameObject tower; // Trụ hiện tại trên plot
     private Color startColor;
+    private BoxCollider2D plotCollider; // Tham chiếu đến BoxCollider2D của plot
 
+    private bool dattru = true;
     private void Start()
     {
         startColor = sr.color;
+        plotCollider = GetComponent<BoxCollider2D>(); // Lấy BoxCollider2D của plot
+        // Đảm bảo trạng thái ban đầu đúng
+        
     }
+
     private void OnMouseEnter()
     {
-        sr.color = hoverColor;
+        if (tower == null && plotCollider != null && plotCollider.enabled) // Chỉ đổi màu nếu không có trụ và collider còn hoạt động
+        {
+            sr.color = hoverColor;
+        }
     }
 
     private void OnMouseExit()
     {
-        sr.color = startColor;
+        if (plotCollider != null && plotCollider.enabled) // Chỉ quay lại màu gốc nếu collider còn hoạt động
+        {
+            sr.color = startColor;
+        }
     }
 
-    private void OnMouseDown()
+    // Hàm kiểm tra xem có thể đặt trụ không (chỉ cho phép nếu không có trụ và collider hoạt động)
+    public bool CanPlaceTurret()
     {
-        if (tower != null) return;
+        return dattru;
+    }
 
-        GameObject towerToBuild = BuildManager.main.GetSelectedTower();
+    // Hàm đặt trụ khi thả từ shop, tắt BoxCollider2D sau khi đặt (giữ sprite hiển thị)
+    public void PlaceTurret(GameObject turretPrefab)
+    {
+        if (CanPlaceTurret())
+        {
+            tower = Instantiate(turretPrefab, transform.position, Quaternion.identity);
+            plotCollider.enabled = false;
+            dattru = false;
+            Debug.Log("da tat collier 2D cua plot");
+        }
+    }
 
-        tower = Instantiate(towerToBuild, transform.position, Quaternion.identity);
+
+    // (Tùy Chọn) Phương thức để bật lại tương tác (nếu cần xóa trụ sau này)
+    public void EnableInteractions()
+    {
+        if (tower != null)
+        {
+            Destroy(tower);
+        }
+        tower = null;
+        if (plotCollider != null)
+        {
+            plotCollider.enabled = true; // Kích hoạt lại BoxCollider2D khi mở tương tác
+        }
+        sr.color = startColor; // Đặt lại màu ban đầu
     }
 }
