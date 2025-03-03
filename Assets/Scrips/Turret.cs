@@ -4,26 +4,28 @@ using UnityEngine;
 public class Turret : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Transform turretRotationPoint;
-    [SerializeField] private LayerMask enemyMask;
-    [SerializeField] private GameObject bulletPrefab;
-    [SerializeField] private Transform firingPoint;
-    [SerializeField] private Transform recoilPoint;
+    [SerializeField] private Transform turretRotationPoint; // Điểm xoay của trụ
+    [SerializeField] private LayerMask enemyMask; // Layer của quái
+    [SerializeField] private GameObject bulletPrefab; // Prefab của trụ
+    [SerializeField] private Transform firingPoint; // Điểm bắn đạn - xuất hiện của viên đạn
+    [SerializeField] private Transform recoilPoint; // Điểm giật
 
     [Header("Attributes")]
-    [SerializeField] public float targetingRange = 5f;
-    [SerializeField] private float rotationSpeed = 200f;
-    [SerializeField] private float bps = 1f; // Bullets per second
-    [SerializeField] private int cost = 50;
+    [SerializeField] public float targetingRange = 5f; // Tầm bắn của trụ
+    [SerializeField] private float rotationSpeed = 200f; // Tốc độ xoay của nòng súng
+    [SerializeField] private float bps = 1f; // Bullets per second - số lượng đạn bắn mỗi giây
+    [SerializeField] private int cost = 50; // Giá của trụ - dùng để mua trụ
 
     [Header("Recoil")]
-    [SerializeField] private TurretRecoil recoilScript;
+    [SerializeField] private TurretRecoil recoilScript; // Scrips xử lý giật nòng súng
 
-    private Transform target;
-    private float timeUntilFire;
+    private Transform target; // mục tiêu của trụ
+    private float timeUntilFire; // Thời gian đếm ngược để bắn phát tiếp theo
+    private float targetAngle; // Góc mục tiêu mà trụ cần quay đến
 
     private void Start()
     {
+        // Kiểm tra xem component recoil được gắn chưa, nếu chưa thì tự lấy trong recoil Point
         if (recoilScript == null && recoilPoint != null)
         {
             recoilScript = recoilPoint.GetComponent<TurretRecoil>();
@@ -55,37 +57,62 @@ public class Turret : MonoBehaviour
 
             if (timeUntilFire >= 1f / bps && (recoilScript == null || recoilScript.CanRotateAndFire()))
             {
-                Shoot();
-                timeUntilFire = 0f;
+                // Kiểm tra xem trụ đã quay đúng hướng chưa (thêm ngưỡng sai số, ví dụ 5 độ)
+                float currentAngle = turretRotationPoint.eulerAngles.z;
+                float angleDifference = Mathf.Abs(Mathf.DeltaAngle(currentAngle, targetAngle));
+                if (angleDifference < 5f) // Ngưỡng 5 độ, có thể điều chỉnh
+                {
+                    Shoot();
+                    timeUntilFire = 0f;
+                }
             }
         }
     }
 
     private void FindTarget()
     {
-        RaycastHit2D[] hits = Physics2D.CircleCastAll(transform.position, targetingRange, (Vector2)transform.position, 0f, enemyMask);
+        // Sử dụng OverlapCircleAll để tìm tất cả collider trong tầm bắn
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, targetingRange, enemyMask);
 
-        if (hits.Length > 0)
+        Transform closestTarget = null;
+        float closestDistance = targetingRange;
+
+        foreach (Collider2D hit in hits)
         {
-            target = hits[0].transform;
+            if (hit.transform != null && hit.gameObject.activeInHierarchy) // Kiểm tra mục tiêu còn tồn tại
+            {
+                float distance = Vector2.Distance(transform.position, hit.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestTarget = hit.transform;
+                    closestDistance = distance;
+                }
+            }
         }
+
+        target = closestTarget;
     }
 
     private void OnDrawGizmosSelected()
     {
-        Handles.color = Color.cyan;
-        Handles.DrawWireDisc(transform.position, transform.forward, targetingRange);
+        // Vẽ vòng tròn tầm bắn trong Scene View với màu đỏ
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, targetingRange);
     }
 
     private void RotateTowardsTarget()
     {
+        if (target == null) return;
+
         float angle = Mathf.Atan2(target.position.y - transform.position.y, target.position.x - transform.position.x) * Mathf.Rad2Deg - 90f;
+        targetAngle = angle; // Lưu góc mục tiêu
         Quaternion targetRotation = Quaternion.Euler(new Vector3(0f, 0f, angle));
         turretRotationPoint.rotation = Quaternion.RotateTowards(turretRotationPoint.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
 
     private bool CheckTargetIsInRange()
     {
+        if (target == null) return false;
         return Vector2.Distance(target.position, transform.position) <= targetingRange;
     }
 

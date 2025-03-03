@@ -7,16 +7,16 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private int goldValue = 10; // Số vàng nhận được khi tiêu diệt quái
 
     [Header("References")]
-    [SerializeField] private HealthBar healthBar; // Tham chiếu đến HealthBar của quái
-
+  /*  [SerializeField] private HealthBar healthBar; // Tham chiếu đến HealthBar của quái*/
+    [SerializeField] private NumberBar numberBar;
     private int currentHealth;
 
     private void Start()
     {
         currentHealth = maxHealth;
-        if (healthBar != null)
+        if (numberBar != null)
         {
-            healthBar.SetHealth(currentHealth, maxHealth); // Khởi tạo thanh máu
+            numberBar.SetHealth(currentHealth, maxHealth); // Khởi tạo thanh máu
         }
         else
         {
@@ -28,9 +28,9 @@ public class EnemyHealth : MonoBehaviour
     {
         currentHealth -= damage;
 
-        if (healthBar != null)
+        if (numberBar != null)
         {
-            healthBar.SetHealth(currentHealth, maxHealth); // Cập nhật thanh máu
+            numberBar.SetHealth(currentHealth, maxHealth); // Cập nhật thanh máu
         }
 
         if (currentHealth <= 0)

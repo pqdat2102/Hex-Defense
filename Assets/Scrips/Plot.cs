@@ -49,13 +49,10 @@ public class Plot : MonoBehaviour
             tower = Instantiate(turretPrefab, transform.position, Quaternion.identity);
             plotCollider.enabled = false;
             dattru = false;
-            Debug.Log("da tat collier 2D cua plot");
         }
     }
 
-
-    // (Tùy Chọn) Phương thức để bật lại tương tác (nếu cần xóa trụ sau này)
-    public void EnableInteractions()
+/*    public void EnableInteractions()
     {
         if (tower != null)
         {
@@ -67,5 +64,5 @@ public class Plot : MonoBehaviour
             plotCollider.enabled = true; // Kích hoạt lại BoxCollider2D khi mở tương tác
         }
         sr.color = startColor; // Đặt lại màu ban đầu
-    }
+    }*/
 }

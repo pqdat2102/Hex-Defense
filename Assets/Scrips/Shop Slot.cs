@@ -174,25 +174,48 @@ public class ShopSlot : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDr
                     {
                         rangePreview = new GameObject("RangePreview");
                         LineRenderer lr = rangePreview.AddComponent<LineRenderer>();
-                        lr.positionCount = 32;
+                        lr.positionCount = 64;
                         lr.startWidth = 0.1f;
                         lr.endWidth = 0.1f;
                         lr.material = new Material(Shader.Find("Sprites/Default"));
                         lr.startColor = new Color(0, 1, 1, 0.5f); // Xanh nhạt, trong suốt
                         lr.endColor = new Color(0, 1, 1, 0.5f);
-                        // Đặt layer của RangePreview là 2
-                        rangePreview.layer = 2;
+                        rangePreview.layer = 5; 
+                    }
+                    else
+                    {
+                        LineRenderer lr = rangePreview.GetComponent<LineRenderer>();
+                        lr.positionCount = 64; // Reset positionCount
+                        lr.enabled = true;
                     }
 
                     LineRenderer lineRenderer = rangePreview.GetComponent<LineRenderer>();
                     Vector3 center = plot.transform.position;
                     float range = turret.targetingRange;
-                    for (int i = 0; i < 32; i++)
+
+                    // Tính toán các điểm cho vòng tròn
+                    Vector3 firstPosition = Vector3.zero; // Lưu vị trí điểm đầu
+                    for (int i = 0; i < 64; i++)
                     {
-                        float angle = i * Mathf.PI * 2 / 32;
+                        float angle = i * (2f * Mathf.PI) / 64f; // Giữ nguyên công thức hiện tại
                         Vector3 pos = center + new Vector3(Mathf.Cos(angle) * range, Mathf.Sin(angle) * range, 0);
+                        if (i == 0)
+                        {
+                            firstPosition = pos; // Lưu vị trí điểm đầu
+                        }
                         lineRenderer.SetPosition(i, pos);
                     }
+
+                    // Đảm bảo điểm cuối (Point 63) khớp với điểm đầu (Point 0) để vòng tròn khép kín
+                    lineRenderer.SetPosition(63, firstPosition); // Gán điểm cuối với điểm đầu
+
+                    // Debug để kiểm tra
+                    if (Debug.isDebugBuild)
+                    {
+                        Vector3 pos0 = lineRenderer.GetPosition(0);
+                        Vector3 pos63 = lineRenderer.GetPosition(63);
+                    }
+
                     lineRenderer.enabled = true;
                 }
             }
@@ -209,7 +232,12 @@ public class ShopSlot : MonoBehaviour, IPointerDownHandler, IDragHandler, IEndDr
         GameObject rangePreview = GameObject.Find("RangePreview");
         if (rangePreview != null)
         {
-            rangePreview.GetComponent<LineRenderer>().enabled = false;
+            LineRenderer lr = rangePreview.GetComponent<LineRenderer>();
+            if (lr != null)
+            {
+                lr.enabled = false;
+                lr.positionCount = 0; // Reset để tránh giữ lại điểm cũ
+            }
         }
     }
 

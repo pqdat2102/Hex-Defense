@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6b194f808b1af6499c93410e504af42, type: 3}
+  m_Name: Boss_creative_Atlas
+  m_EditorClassIdentifier: 
+  textureLoadingMode: 0
+  onDemandTextureLoader: {fileID: 0}
+  atlasFile: {fileID: 4900000, guid: bb5780593f2ffe04d9da5c951e8c4b6c, type: 3}
+  materials:
+  - {fileID: 2100000, guid: c30ef3e140026e04ead56f3320ad4223, type: 2}
+  - {fileID: 2100000, guid: 5b6e8df520458b14d85d39ee4d48c19e, type: 2}
+  - {fileID: 2100000, guid: c4059f4ba0c92f847aab8ff3651ff8f6, type: 2}
+  - {fileID: 2100000, guid: f11f2d487fdfd9c489c30906b337a673, type: 2}
+  - {fileID: 2100000, guid: 0d46c8bcc2efb6149bc4885fae82a10c, type: 2}
